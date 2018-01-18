@@ -35,7 +35,7 @@ int main() {
 	//}
 	//adapter.uninitialize();
 
-	cout << "jidjiaj" << endl;
+
 
 	// ******* postgres test *******
 	DBAdapter adapter;
