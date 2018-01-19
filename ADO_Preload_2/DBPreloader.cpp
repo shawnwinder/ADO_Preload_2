@@ -25,6 +25,7 @@
 #define MONEY_COLUMN 3
 #define RECORD_COLUMN 4
 #define DIRECTION_COLUMN 5
+#define ROW_SIZE 6
 #define parallel_for cilk_for
 #define EDGE "Edge"
 #define LIGRA "Ligra"
@@ -242,10 +243,10 @@ wchar_t* DBPreloader::Utf8_2_Unicode(char* row_i)
 	return wszStr;
 }
 
-bool DBPreloader::null_field(const vector<string> &row, int row_size) {
+bool DBPreloader::null_field(const char(&row)[ROW_SIZE][MAX_LENGTH], int row_size) {
 	string tmp;
-	for (auto str : row) {
-		tmp = format_dquote(str);
+	for (int i = 0; i < row_size; ++i) {
+		tmp = format_dquote(row[i]);
 		// no empty field
 		if (tmp == "") {
 			return true;
@@ -427,16 +428,15 @@ void DBPreloader::preload_csv(
 	string dst_output = dst_directory + "\\" + EDGE;
 	std::ofstream ofile(dst_output.c_str());
 	ofile << string(40, ' ') << endl;   // for first line
+
+	char row[ROW_SIZE][MAX_LENGTH] = { 0 };
 	while (adapter.has_record()) {
 		// get the row of the query result
 		// since the code of DB is utf-8, here using wstring
-		vector<wstring> wrow;	
-		adapter.fetch_row(wrow);
-		vector<string> row;
-		for (auto ws : wrow) row.push_back(string(ws.begin(), ws.end()));
+		adapter.fetch_row(row);
 
 		// check null filed
-		if (null_field(row, row.size()))
+		if (null_field(row, ROW_SIZE))
 			continue;
 
 		// format date
@@ -572,16 +572,15 @@ void DBPreloader::preload_csv(
 	string dst_output = dst_directory + "\\" + EDGE;
 	std::ofstream ofile(dst_output.c_str());
 	ofile << string(40, ' ') << endl;   // for first line
+
+	char row[ROW_SIZE][MAXBYTE] = { 0 };
 	while (adapter.has_record()) {
 		// get the row of the query result
 		// since the code of DB is utf-8, here using wstring
-		vector<wstring> wrow;
-		adapter.fetch_row(wrow);
-		vector<string> row;
-		for (auto ws : wrow) row.push_back(string(ws.begin(), ws.end()));
+		adapter.fetch_row(row);
 
 		// check null filed
-		if (null_field(row, row.size()))
+		if (null_field(row, ROW_SIZE))
 			continue;
 
 		// format date

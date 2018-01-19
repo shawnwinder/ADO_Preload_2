@@ -3,6 +3,8 @@
 #include <vector>
 #include <set>
 
+#define ROW_SIZE 6
+#define MAX_LENGTH 255
 
 ///***	   non-class functions    ***
 int API_TimeToStringEX(std::string &strDateStr, const time_t &timeData);
@@ -59,7 +61,7 @@ private:
 	wchar_t* Utf8_2_Unicode(char* row_i);
 	time_t format_date(std::string date_word);
 	std::string format_dquote(std::string field);
-	bool null_field(const std::vector<std::string>& row, int row_size);
+	bool null_field(const char (&row)[ROW_SIZE][MAX_LENGTH], int row_size);
 public:
 	DBPreloader() = default;
 	~DBPreloader() = default;

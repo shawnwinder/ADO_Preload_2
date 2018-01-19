@@ -1,4 +1,5 @@
 #include <map>
+#include <string.h>
 #include "DBAdapter.h"
 
 // create ADO connection
@@ -128,17 +129,17 @@ inline bool DBAdapter::has_record() {
 	return !pRecordset->adoEOF;
 }
 
-void DBAdapter::fetch_row(std::vector<std::wstring>& row) 
+void DBAdapter::fetch_row(char (&row)[ROW_SIZW][MAX_LENGTH])
 {
 	try {
 		_variant_t index;
-		wchar_t* wctmp;
+		char* ctmp;
 		for (long i = 0; i < pRecordset->Fields->Count; ++i) {
 			index.vt = VT_I2, index.intVal = i;
 			auto field = pRecordset->Fields->GetItem(index);
-			wctmp = (wchar_t*)(_bstr_t)field->GetValue();
+			ctmp = (char*)(_bstr_t)field->GetValue();
+			strcpy(row[i], ctmp);
 			// WideCharToMultiByte(CP_ACP, WC_COMPOSITECHECK, wctmp, -1, szANSIString, sizeof(szANSIString), NULL, NULL);
-			row.push_back(wctmp);
 		}
 		pRecordset->MoveNext();
 	}

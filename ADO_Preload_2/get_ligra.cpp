@@ -39,12 +39,14 @@
 //	//	cond
 //	//);
 //
+//
+//
 //	// PostgreSQL test
 //	string host_name = "127.0.0.1";
 //	string port_name = "5432";
 //	string db_name = "test_db";
-//	// string table_name = "pg_ado_test";
-//	string table_name = "pg_ado_test_2";
+//	string table_name = "pg_ado_test";
+//	// string table_name = "pg_ado_test_2";
 //	string schema_name = "public";
 //	string user = "postgres";
 //	string password = "root";
