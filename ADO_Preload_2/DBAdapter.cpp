@@ -2,6 +2,8 @@
 #include <string.h>
 #include "DBAdapter.h"
 
+#include <locale>
+
 // create ADO connection
 inline void DBAdapter::create_connection() {
 	HRESULT hr = pConnection.CreateInstance(__uuidof(Connection));
@@ -74,10 +76,11 @@ void DBAdapter::make_connection(
 		pConnection->CommandTimeout = 120;
 		pConnection->ConnectionString = ("Driver={MySQL ODBC 5.3 Unicode Driver};"
 			"Server=" + host_name + ";"
-			//"Port=" + port_name + ";"
+			"Port=" + port_name + ";"
 			"Database=" + db_name + ";"
 			"User=" + user + ";"
 			"Password=" + password + ";"
+			// "charset=GBK;"
 			"Option=3;").c_str();
 		pConnection->Open("", "", "", adConnectUnspecified);
 		// std::cout << "pConnection state: " << pConnection->State << std::endl;
@@ -105,7 +108,8 @@ void DBAdapter::make_connection(
 			"Schema=" + schema_name +";"
 			"Database=" + db_name + ";"
 			"Uid=" + user + ";"
-			"Pwd=" + password + ";").c_str();
+			"Pwd=" + password + ";"
+			"charset=GBK;").c_str();
 		pConnection->Open("", "", "", adConnectUnspecified);
 		// std::cout << "pConnection state: " << pConnection->State << std::endl;
 	}
@@ -116,6 +120,7 @@ void DBAdapter::make_connection(
 
 void DBAdapter::excute_sql(std::string conn_str) {
 	try {
+		// the select sql
 		pRecordset = pConnection->
 			Execute(conn_str.c_str(), NULL, adCmdText);
 		// std::cout << "Recordset state: " << pRecordset->State << std::endl;
@@ -129,18 +134,31 @@ inline bool DBAdapter::has_record() {
 	return !pRecordset->adoEOF;
 }
 
-void DBAdapter::fetch_row(char (&row)[ROW_SIZW][MAX_LENGTH])
+void DBAdapter::fetch_row(char (&row)[ROW_SIZE][MAX_LENGTH])
 {
 	try {
 		_variant_t index;
-		char* ctmp;
+		index.vt = VT_I2;
+		char ctmp[MAX_LENGTH] = { 0 };
 		for (long i = 0; i < pRecordset->Fields->Count; ++i) {
-			index.vt = VT_I2, index.intVal = i;
+			index.intVal = i;
 			auto field = pRecordset->Fields->GetItem(index);
-			ctmp = (char*)(_bstr_t)field->GetValue();
-			strcpy(row[i], ctmp);
-			// WideCharToMultiByte(CP_ACP, WC_COMPOSITECHECK, wctmp, -1, szANSIString, sizeof(szANSIString), NULL, NULL);
+			// null check
+			auto field_value = field->GetValue();
+			if (field_value.vt == VT_NULL)
+				row[i][0] = 0;
+			else {
+				strcpy(ctmp,(char*)_bstr_t(field_value));
+				strcpy(row[i], ctmp);
+			}
+
+			// cout << ctmp << " ";
+			//wcscpy(wctmp, (wchar_t*)_bstr_t(field->GetValue()));
+			//WideCharToMultiByte(CP_ACP, WC_COMPOSITECHECK, wctmp, -1, ctmp, sizeof(ctmp), NULL, NULL);
+			//setlocale(LC_ALL, "zh_CN.UTF-8");
+			//wprintf(L"%ls ", wctmp);
 		}
+
 		pRecordset->MoveNext();
 	}
 	catch (_com_error e) {
@@ -176,32 +194,6 @@ void DBAdapter::show_SQL_result() {
 			// cout << endl;
 			pRecordset->MoveNext();
 		}
-
-		//wchar_t* stmp;
-		//string src_account = "src_account";
-		//string dst_account = "dst_account";
-		//string date = "date";
-		//string money = "money";
-		//string record_id = "id";
-		//string direction = "direction";
-		//while (has_record()) {
-		//	++count;
-		//	if (count % 1000 == 0) cout << "count = " << count << endl;
-		//	stmp = (wchar_t*)(_bstr_t)(pRecordset->Fields->
-		//		GetItem(_variant_t(src_account.c_str()))->Value);
-		//	stmp = (wchar_t*)(_bstr_t)(pRecordset->Fields->
-		//		GetItem(_variant_t(dst_account.c_str()))->Value);
-		//	stmp = (wchar_t*)(_bstr_t)(pRecordset->Fields->
-		//		GetItem(_variant_t(date.c_str()))->Value);
-		//	stmp = (wchar_t*)(_bstr_t)(pRecordset->Fields->
-		//		GetItem(_variant_t(money.c_str()))->Value);
-		//	stmp = (wchar_t*)(_bstr_t)(pRecordset->Fields->
-		//		GetItem(_variant_t(record_id.c_str()))->Value);
-		//	stmp = (wchar_t*)(_bstr_t)(pRecordset->Fields->
-		//		GetItem(_variant_t(direction.c_str()))->Value);
-		//	pRecordset->MoveNext();
-		//}
-
 	}
 	catch (_com_error e) {
 		std::cout << e.Description() << std::endl;

@@ -413,6 +413,7 @@ void DBPreloader::preload_csv(
 
 	// excute sql query
 	// pay attention to the space & CANNOT change the sequence of the reading parameters
+	// cond = "where money=250000 and date='2007-1-31'";
 	string mysql_query = "select " + src_account + "," + dst_account + "," + date + ","
 		+ money + "," + record_id + "," + direction + " from " + table_name + " " + cond;
 	adapter.excute_sql(mysql_query);
@@ -479,9 +480,7 @@ void DBPreloader::preload_csv(
 		raw_direction = format_dquote(raw_direction);
 
 		// write csv file 
-		string in = "进";
-		string out = "出";
-		if (raw_direction == in) {
+		if (raw_direction == "进") {
 			ofile << dst_index << ',' << src_index << ','
 				<< raw_date << ',' << raw_money << ',' << raw_record << endl;
 		}
@@ -573,7 +572,7 @@ void DBPreloader::preload_csv(
 	std::ofstream ofile(dst_output.c_str());
 	ofile << string(40, ' ') << endl;   // for first line
 
-	char row[ROW_SIZE][MAXBYTE] = { 0 };
+	char row[ROW_SIZE][MAX_LENGTH] = { 0 };
 	while (adapter.has_record()) {
 		// get the row of the query result
 		// since the code of DB is utf-8, here using wstring
@@ -623,9 +622,7 @@ void DBPreloader::preload_csv(
 		raw_direction = format_dquote(raw_direction);
 
 		// write csv file 
-		string in = "进";
-		string out = "出";
-		if (raw_direction == in) {
+		if (raw_direction == "进") {
 			ofile << dst_index << ',' << src_index << ','
 				<< raw_date << ',' << raw_money << ',' << raw_record << endl;
 		}

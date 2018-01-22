@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#define ROW_SIZW 6
+#define ROW_SIZE 6
 #define MAX_LENGTH 255
 
 class DBAdapter {
@@ -43,7 +43,7 @@ public:
 	void excute_sql(std::string conn_str);
 	void show_SQL_result();
 	bool has_record();
-	void fetch_row(char (&row)[ROW_SIZW][MAX_LENGTH]);
+	void fetch_row(char (&row)[ROW_SIZE][MAX_LENGTH]);
 	// debug
 	_RecordsetPtr getRecordset() { return this->pRecordset; }
 };
